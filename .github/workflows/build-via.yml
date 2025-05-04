@@ -1,0 +1,46 @@
+# .github/workflows/build-via.yml
+name: Build VIA firmware
+
+on:
+  workflow_dispatch:   # 手動トリガーのみ
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) ソースとサブモジュール取得
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      # 2) 依存ツールをインストール
+      - name: Install dependencies (AVR toolchain + QMK CLI)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential git python3 python3-pip \
+            gcc-avr avr-libc
+
+          # QMK CLI をユーザ領域にインストール
+          python3 -m pip install --user qmk
+          # ~/.local/bin を PATH に追加（GitHub Actions のおすすめ方法）
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # 3) QMK／Vial サブモジュール展開
+      - name: Init submodules
+        run: make git-submodule
+
+      # 4) Corne (rev4_1/standard) の VIA ファームをビルド
+      - name: Compile Corne VIA firmware
+        run: |
+          make qmk-clean
+          kb=crkbd make qmk-init
+          kb=crkbd kr=rev4_1/standard km=via make qmk-compile
+
+      # 5) 生成された .hex を成果物としてアップロード
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: corne-via-${{ github.run_number }}
+          path: keyboards/crkbd/qmk/qmk_firmware/.build/*.hex
