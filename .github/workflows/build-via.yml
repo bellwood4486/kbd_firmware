@@ -1,24 +1,25 @@
+# .github/workflows/build-via.yml
 name: Build VIA firmware
 
-on: { workflow_dispatch: {} }   # 手動トリガーのみ
+on: { workflow_dispatch: {} }
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) リポジトリ取得（サブモジュールはここでは取らない）
+      # 1) ソース取得（サブモジュールはあとで）
       - uses: actions/checkout@v4
         with:
           submodules: false
 
       # 2) サブモジュールを固定リビジョンで初期化
-      - name: Init submodules (ignore local changes)
+      - name: Init submodules
         run: |
           git submodule sync --recursive
-          git submodule update --init --recursive   # ← --remote を付けず「固定」だけ
+          git submodule update --init --recursive
 
-      # 3) AVR toolchain と QMK CLI
+      # 3) ビルド依存ツール + QMK CLI
       - name: Install toolchain & QMK CLI
         run: |
           sudo apt-get update
@@ -27,16 +28,22 @@ jobs:
           python3 -m pip install --user qmk
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-      # 4) Corne (rev4_1/standard) の VIA ファームをビルド
+      # 4) submodule の Python 依存を満たす
+      - name: Install QMK Python requirements
+        run: |
+          python3 -m pip install --user \
+            -r src/qmk/qmk_firmware/requirements.txt
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # 5) VIA ファームをビルド
       - name: Compile Corne VIA firmware
         run: |
           make qmk-clean
           kb=crkbd make qmk-init
           kb=crkbd kr=rev4_1/standard km=via make qmk-compile
 
-      # 5) 生成物をアップロード
-      - name: Upload firmware artifact
-        uses: actions/upload-artifact@v4
+      # 6) 成果物をアップロード
+      - uses: actions/upload-artifact@v4
         with:
           name: corne-via-${{ github.run_number }}
           path: keyboards/crkbd/qmk/qmk_firmware/.build/*.hex
