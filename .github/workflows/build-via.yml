@@ -57,4 +57,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: corne-via-${{ github.run_number }}
-          path: keyboards/crkbd/qmk/qmk_firmware/.build/*.uf2
+          path: keyboards/crkbd/qmk/qmk_firmware/.build/**/*.uf2
