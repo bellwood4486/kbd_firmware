@@ -54,7 +54,9 @@ jobs:
           ls -lh keyboards/crkbd/qmk/qmk_firmware/.build/*.uf2 || echo "(no .uf2 found)"
 
       # 6) 成果物をアップロード
-      - uses: actions/upload-artifact@v4
+      - name: Upload firmware artifact (robust)
+        uses: actions/upload-artifact@v4
         with:
           name: corne-via-${{ github.run_number }}
-          path: keyboards/crkbd/qmk/qmk_firmware/.build/**/*.uf2
+          path: |
+            keyboards/crkbd/qmk/qmk_firmware/.build/crkbd_rev4_1_standard_via.uf2
