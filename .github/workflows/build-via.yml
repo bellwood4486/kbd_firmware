@@ -45,6 +45,14 @@ jobs:
           kb=crkbd make qmk-init
           kb=crkbd kr=rev4_1/standard km=via make qmk-compile
 
+      # For Debug
+      - name: list expected artifact paths
+        run: |
+          echo "expected standard build path:"
+          ls -lh src/qmk/qmk_firmware/.build/*.uf2 || echo "(no .uf2 found)"
+          echo "expected copied path (makefile side):"
+          ls -lh keyboards/crkbd/qmk/qmk_firmware/.build/*.uf2 || echo "(no .uf2 found)"
+
       # 6) 成果物をアップロード
       - uses: actions/upload-artifact@v4
         with:
