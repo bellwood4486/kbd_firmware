@@ -1,7 +1,11 @@
 # .github/workflows/build-via.yml
 name: Build VIA firmware
 
-on: { workflow_dispatch: {} }
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - '**'  # すべてのブランチを対象
 
 jobs:
   build:
