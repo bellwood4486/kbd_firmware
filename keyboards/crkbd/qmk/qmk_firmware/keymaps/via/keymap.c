@@ -1,6 +1,5 @@
 #include QMK_KEYBOARD_H
 
-
 #ifdef LAYOUT_split_3x6_3_ex2
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [0] = LAYOUT_split_3x6_3_ex2(
@@ -113,3 +112,19 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
   [3] = { ENCODER_CCW_CW(RGB_MOD, RGB_RMOD), ENCODER_CCW_CW(RGB_HUI, RGB_HUD), ENCODER_CCW_CW(RGB_VAI, RGB_VAD), ENCODER_CCW_CW(RGB_SAI, RGB_SAD), },
 };
 #endif
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    // CMD+QをCMD+Tabとして扱う
+    if (keycode == KC_Q && record->event.pressed) {
+        uint8_t mods = get_mods();
+        // CMD（GUI）が押されていない場合は何もしない
+        if (!(mods & MOD_MASK_GUI)) {
+            return true;
+        }
+        // そのまま全部送る
+        tap_code16((mods << 8) | KC_TAB);
+        return false; // Q は送らない
+    }
+
+    return true; // 他のキーは通常通り処理
+}
