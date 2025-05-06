@@ -113,17 +113,33 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 };
 #endif
 
+// bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+//     // CMD+QをCMD+Tabとして扱う
+//     if (keycode == KC_Q && record->event.pressed) {
+//         uint8_t mods = get_mods();
+//         // CMD（GUI）が押されていない場合は何もしない
+//         if (!(mods & MOD_MASK_GUI)) {
+//             return true;
+//         }
+//         // そのまま全部送る
+//         tap_code16((mods << 8) | KC_TAB);
+//         return false; // Q は送らない
+//     }
+
+//     return true; // 他のキーは通常通り処理
+// }
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    // CMD+QをCMD+Tabとして扱う
     if (keycode == KC_Q && record->event.pressed) {
         uint8_t mods = get_mods();
-        // CMD（GUI）が押されていない場合は何もしない
-        if (!(mods & MOD_MASK_GUI)) {
-            return true;
+        // CMD（GUI）だけ、Altだけ、Ctrlだけ → 対応
+        if (mods & (MOD_MASK_GUI | MOD_MASK_ALT | MOD_MASK_CTRL)) {
+            // Tab に修飾キーを付けて送信（Shift などもそのまま残る）
+            tap_code16((mods << 8) | KC_TAB);
+            return false; // Q は送らない
         }
-        // そのまま全部送る
-        tap_code16((mods << 8) | KC_TAB);
-        return false; // Q は送らない
+        // それ以外（修飾なし or 不明な修飾付き）は Q をそのまま送る
+        return true;
     }
 
     return true; // 他のキーは通常通り処理
