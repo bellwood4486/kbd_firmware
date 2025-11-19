@@ -135,7 +135,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         if ((mods & MOD_MASK_CTRL) &&
             !(mods & (MOD_MASK_ALT | MOD_MASK_GUI | MOD_MASK_SHIFT))) {
             clear_mods();               // すべての修飾キーを外す
-            tap_code(KC_LANG1);         // 単独の Lang1 を送信
+            tap_code(KC_LNG1);          // 単独の Lang1 を送信
             return false;               // Space は送らない
         }
     }
