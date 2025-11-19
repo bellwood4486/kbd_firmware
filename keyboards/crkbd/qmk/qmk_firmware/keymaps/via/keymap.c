@@ -114,6 +114,7 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 #endif
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    /*
     if (keycode == KC_Q && record->event.pressed) {
         uint8_t mods = get_mods();
         // CMD（GUI）だけ、Altだけ、Ctrlだけ → 対応
@@ -124,6 +125,19 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         }
         // それ以外（修飾なし or 不明な修飾付き）は Q をそのまま送る
         return true;
+    }
+    */
+
+    if (keycode == KC_SPC && record->event.pressed) {
+        uint8_t mods = get_mods();
+        // Ctrl のみ + Space のときだけ 単独 Lang1 を送る
+        // （Ctrl+Alt+Space など他の修飾が含まれている場合は通常処理）
+        if ((mods & MOD_MASK_CTRL) &&
+            !(mods & (MOD_MASK_ALT | MOD_MASK_GUI | MOD_MASK_SHIFT))) {
+            clear_mods();               // すべての修飾キーを外す
+            tap_code(KC_LANG1);         // 単独の Lang1 を送信
+            return false;               // Space は送らない
+        }
     }
 
     return true; // 他のキーは通常通り処理
